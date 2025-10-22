@@ -1,0 +1,198 @@
+<#
+if (string.IsNullOrEmpty(Namespace)) Namespace=ConnectionStringName;
+if (string.IsNullOrEmpty(RepoName) && !string.IsNullOrEmpty(ConnectionStringName)) RepoName=ConnectionStringName + "DB";
+if (string.IsNullOrEmpty(Namespace)) Namespace="PetaPoco";
+if (string.IsNullOrEmpty(RepoName)) RepoName="PetaPocoDB";
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using PetaPoco;
+
+namespace <#=Namespace #>
+{
+<# if (GenerateCommon) { #>
+	public partial class <#=RepoName#> : Database
+	{
+		public <#=RepoName#>() : base("<#=ConnectionStringName#>")
+		{
+			CommonConstruct();
+		}
+
+		public <#=RepoName#>(string connectionStringName) : base(connectionStringName)
+		{
+			CommonConstruct();
+		}
+		
+		partial void CommonConstruct();
+		
+		public interface IFactory
+		{
+			<#=RepoName#> GetInstance();
+		}
+		
+		public static IFactory Factory { get; set; }
+
+        public static <#=RepoName#> GetInstance()
+        {
+			if (_instance != null) return _instance;
+			if (Factory != null) return Factory.GetInstance();
+			return new <#=RepoName#>();
+        }
+
+		[ThreadStatic] static <#=RepoName#> _instance;
+		
+		public override void OnBeginTransaction()
+		{
+			if (_instance == null) _instance = this;
+		}
+		
+		public override void OnEndTransaction()
+		{
+			if (_instance == this) _instance = null;
+		}
+<# if (GenerateOperations) { #>
+
+		public class Record<T> where T:new()
+		{
+			public static <#=RepoName#> Repo { get { return <#=RepoName#>.GetInstance(); } }
+			public bool IsNew() { return Repo.IsNew(this); }
+			public object Insert() { return Repo.Insert(this); }
+<# if (!TrackModifiedColumns) { #>
+			public void Save() { Repo.Save(this); }
+			public int Update() { return Repo.Update(this); }
+<# } #>
+			public int Update(IEnumerable<string> columns) { return Repo.Update(this, columns); }
+			public static int Update(string sql, params object[] args) { return Repo.Update<T>(sql, args); }
+			public static int Update(Sql sql) { return Repo.Update<T>(sql); }
+			public int Delete() { return Repo.Delete(this); }
+			public static int Delete(string sql, params object[] args) { return Repo.Delete<T>(sql, args); }
+			public static int Delete(Sql sql) { return Repo.Delete<T>(sql); }
+			public static int Delete(object primaryKey) { return Repo.Delete<T>(primaryKey); }
+			public static bool Exists(object primaryKey) { return Repo.Exists<T>(primaryKey); }
+			public static bool Exists(string sql, params object[] args) { return Repo.Exists<T>(sql, args); }
+			public static T SingleOrDefault(object primaryKey) { return Repo.SingleOrDefault<T>(primaryKey); }
+			public static T SingleOrDefault(string sql, params object[] args) { return Repo.SingleOrDefault<T>(sql, args); }
+			public static T SingleOrDefault(Sql sql) { return Repo.SingleOrDefault<T>(sql); }
+			public static T FirstOrDefault(string sql, params object[] args) { return Repo.FirstOrDefault<T>(sql, args); }
+			public static T FirstOrDefault(Sql sql) { return Repo.FirstOrDefault<T>(sql); }
+			public static T Single(object primaryKey) { return Repo.Single<T>(primaryKey); }
+			public static T Single(string sql, params object[] args) { return Repo.Single<T>(sql, args); }
+			public static T Single(Sql sql) { return Repo.Single<T>(sql); }
+			public static T First(string sql, params object[] args) { return Repo.First<T>(sql, args); }
+			public static T First(Sql sql) { return Repo.First<T>(sql); }
+			public static List<T> Fetch(string sql, params object[] args) { return Repo.Fetch<T>(sql, args); }
+			public static List<T> Fetch(Sql sql) { return Repo.Fetch<T>(sql); }
+			public static List<T> Fetch(long page, long itemsPerPage, string sql, params object[] args) { return Repo.Fetch<T>(page, itemsPerPage, sql, args); }
+			public static List<T> Fetch(long page, long itemsPerPage, Sql sql) { return Repo.Fetch<T>(page, itemsPerPage, sql); }
+			public static List<T> SkipTake(long skip, long take, string sql, params object[] args) { return Repo.SkipTake<T>(skip, take, sql, args); }
+			public static List<T> SkipTake(long skip, long take, Sql sql) { return Repo.SkipTake<T>(skip, take, sql); }
+			public static Page<T> Page(long page, long itemsPerPage, string sql, params object[] args) { return Repo.Page<T>(page, itemsPerPage, sql, args); }
+			public static Page<T> Page(long page, long itemsPerPage, Sql sql) { return Repo.Page<T>(page, itemsPerPage, sql); }
+			public static IEnumerable<T> Query(string sql, params object[] args) { return Repo.Query<T>(sql, args); }
+			public static IEnumerable<T> Query(Sql sql) { return Repo.Query<T>(sql); }
+<# if (TrackModifiedColumns) { #>			
+			private Dictionary<string,bool> _modifiedColumns;
+			private void OnLoaded()
+			{
+				_modifiedColumns = new Dictionary<string,bool>();
+			}
+
+			protected void MarkColumnModified(string column_name)
+			{
+				if (_modifiedColumns != null) _modifiedColumns[column_name] = true;
+			}
+
+			public int Update() 
+			{ 
+				if (_modifiedColumns == null) return Repo.Update(this); 
+
+				int retv = Repo.Update(this, _modifiedColumns.Keys);
+				_modifiedColumns.Clear();
+				return retv;
+			}
+
+			public void Save() 
+			{ 
+				if (Repo.IsNew(this)) Repo.Insert(this);
+				else Update();
+			}
+<# } #>
+		}
+<# } #>
+	}
+<# } #>
+<# if (GeneratePocos) { #>
+<#
+bool AddClassSpacer = GenerateCommon;
+foreach(Table tbl in from t in tables where !t.Ignore select t)
+{
+#>
+<# if (AddClassSpacer) { #>
+
+<# } #>
+<# if (string.IsNullOrEmpty(tbl.Schema)) { #>
+	[TableName("<#=tbl.Name#>")]
+<# } else { #>
+	[TableName("<#=tbl.Schema + "." + tbl.Name#>")]
+<# } #>
+<# if (tbl.PK != null && tbl.PK.IsAutoIncrement) { #>
+<# if (tbl.SequenceName == null) { #>
+	[PrimaryKey("<#=tbl.PK.Name#>")]
+<# } else { #>
+	[PrimaryKey("<#=tbl.PK.Name#>", SequenceName = "<#=tbl.SequenceName#>")]
+<# } #>
+<# } #>
+<# if (tbl.PK!=null && !tbl.PK.IsAutoIncrement) { #>
+	[PrimaryKey("<#=tbl.PK.Name#>", AutoIncrement = false)]
+<# } #>
+<# if (ExplicitColumns) { #>
+	[ExplicitColumns]
+<# } #>
+    public partial class <#=tbl.ClassName#> <# if (GenerateOperations) { #>: <#=RepoName#>.Record<<#=tbl.ClassName#>> <# } #> 
+    {
+<#
+bool AddPropertySpacer = false;
+foreach(Column col in from c in tbl.Columns where !c.Ignore select c)
+{
+if (AddPropertySpacer) { #>
+
+<# }
+		// Column bindings
+#>
+<# if (TrackModifiedColumns) { #>
+<# if (col.Name != col.PropertyName) { #>
+        [Column("<#=col.Name#>")] 
+<# } else { #>
+<# if (ExplicitColumns) { #>
+        [Column] 
+<# } #>
+<# } #>
+		public <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> 
+		{ 
+			get
+			{
+				return _<#=col.PropertyName #>;
+			}
+			set
+			{
+				_<#=col.PropertyName #> = value;
+				MarkColumnModified("<#=col.Name#>");
+			}
+		}
+		<#=col.PropertyType #><#=CheckNullable(col)#> _<#=col.PropertyName #>;
+<# } else { #>
+<# if (col.Name!=col.PropertyName) { #>
+		[Column("<#=col.Name#>")] public <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
+<# } else { #>
+		<# if (ExplicitColumns) { #>[Column] <# } #>public <#=col.PropertyType #><#=CheckNullable(col)#> <#=col.PropertyName #> { get; set; }
+<# } #>
+<# } #>
+<# AddPropertySpacer = true; #>
+<# } #>
+	}
+<# AddClassSpacer = true; #>
+<# } #>
+<# } #>
+}
