@@ -1,38 +1,37 @@
-<img align="right" alt="PetaPoco Logo" width="128" src="https://raw.githubusercontent.com/CollaboratingPlatypus/PetaPoco/master/Media/Logo2/PetaPocoLogo2_256.png">
+<img align="right" alt="PetaPoco Logo" width="128" src="Media/Logo2/PetaPocoLogo2_256.png">
 
-# Welcome to the official PetaPoco repository
+# PetaPoco2025
 
-Originally the brainchild of [Brad Robinson].
+这是PetaPoco ORM的修改版，专注于现代化和简洁性。
 
-PetaPoco is maintained and extended by Wade Baglin (@pleb) and Aaron Sherber (@asherber).
+## 项目特点
 
-## Version 6 - Netstandard 2.0+, 4.0, 4.5+
+- 仅支持 .NET 8.0 和 .NET 9.0
+- 修改了 Page 类的 JSON 属性名称，使用更符合习惯的命名（如 pageindex, pagecount 等）
+- 使用 System.Text.Json 替代 Newtonsoft.Json 进行 JSON 序列化
+- 移除了过时的框架支持和不必要的依赖
 
-Read more about the [v6 update](https://github.com/CollaboratingPlatypus/PetaPoco/wiki/V6NetStandard2-0)
+## 代码仓库
 
-PetaPoco is available from: **NuGet [PetaPoco.Compiled](https://www.nuget.org/packages/PetaPoco.Compiled)**
+[GitHub: https://github.com/buzhizhe/PetaPoco2025.git](https://github.com/buzhizhe/PetaPoco2025.git)
 
-|Master|Development|Nuget|
-|:-----|:----------|:----|
-|[![Build status](https://ci.appveyor.com/api/projects/status/1vodaox1reremsvj/branch/master?svg=true)](https://ci.appveyor.com/project/collaboratingplatypus/petapoco/branch/master)|[![Build status](https://ci.appveyor.com/api/projects/status/1vodaox1reremsvj/branch/development?svg=true)](https://ci.appveyor.com/project/collaboratingplatypus/petapoco/branch/development)|[![Nuget Downloads](https://buildstats.info/nuget/PetaPoco.Compiled)](https://www.nuget.org/packages/PetaPoco.Compiled/)|
+## 主要修改
 
-### Documentation
+1. **JSON 属性命名优化**：Page 类的属性使用 `[JsonPropertyName]` 属性进行重命名
+2. **框架支持精简**：仅保留对 .NET 8.0 和 .NET 9.0 的支持
+3. **依赖清理**：移除了过时的依赖项
 
-For configuration documentation, code examples, and other general usage information, [see the docs].
+## JSON 序列化示例
 
-### Add-ons
+```
+{"pageindex":1,"pagecount":10,"total":100,"pagesize":10,"rows":[...],"Context":null}
+```
 
-* [PetaPoco.SqlKata](https://github.com/asherber/PetaPoco.SqlKata) lets you use the powerful query builder [SqlKata](https://sqlkata.com) to [build SQL queries](https://github.com/CollaboratingPlatypus/PetaPoco/wiki/Building-SQL-Queries) for PetaPoco.
-* [StaTypPocoQueries.PetaPoco](https://github.com/asherber/StaTypPocoQueries.PetaPoco) provides the ability to use some simple, strongly typed, Intellisensed LINQ expressions in your queries.
-* [PetaPoco.DBEntityGenerator](https://github.com/hippasus/PetaPoco.DBEntityGenerator) lets you generate Pocos from your DB (T4 template replacement).
+## 使用说明
 
-## Version 5 - Legacy
+### 基本用法
 
-|Nuget (Single file)|Nuget Core (+t4 templates)|Nuget Core Compiled (dll)|
-|:----|:---------|:------------------|
-|[![Nuget Downloads](https://buildstats.info/nuget/PetaPoco)](https://www.nuget.org/packages/PetaPoco/)|[![Nuget Downloads core](https://buildstats.info/nuget/PetaPoco.Core)](https://www.nuget.org/packages/PetaPoco.Core)|[![Nuget Downloads core](https://buildstats.info/nuget/PetaPoco.Core.Compiled)](https://www.nuget.org/packages/PetaPoco.Core.Compiled)|
-
----
+以下是PetaPoco的基本使用示例：
 
 ## PetaPoco is a tiny & fast micro-ORM for .NET
 
@@ -42,26 +41,21 @@ For configuration documentation, code examples, and other general usage informat
 * Like [SubSonic], it supports generation of poco classes with T4 templates (V5 only)
 * Like [Massive], it's available as a single file that you easily add to any project or complied. (V5 only)
 
-## Features at a Glance
+## 主要特性
 
-* Tiny, and absolutely no dependencies!
-* Asychronous (aka async) or synchronous: the choice is yours. (V6)
-* Works with strictly undecorated POCOs, or attributed almost-POCOs.
-* Easy to configure, including [fluent configuration] out of the box.
-* Helper methods for Insert/Delete/Update/Save and IsNew
-* Paged requests automatically work out the total record count and fetch a specific page.
-* Easy transaction support.
-* Better parameter replacement support, including grabbing named parameters from object properties.
-* Great performance by eliminating Linq and fast property assignment with DynamicMethod generation.
-* The query language is good'ole SQL.
-* Includes a low friction SQL builder class that makes writing inline SQL *much* easier.
-* Includes T4 templates to automatically generate POCO classes for you. (V5)
-* Hooks for logging exceptions, installing value converters and mapping columns to properties without attributes.
-* Works with SQL Server, SQL Server CE, MS Access, SQLite, MySQL, MariaDB, Firebird, and PostgreSQL. (Oracle is supported but does not have integration tests).
-* Works under Net Standard 2.0, .NET 4.0/4.5+ or Mono 2.8 and later.
-* Has [Xunit] unit tests.
-* Has supported DBs integration tests.
-* OpenSource (MIT License or Apache 2.0)
+* 轻量级ORM，性能优秀
+* 支持同步和异步操作
+* 支持简单POCO类和带属性的POCO类
+* 流畅的配置API
+* 内置插入/删除/更新/保存等辅助方法
+* 自动分页功能，包含总记录数和当前页数据
+* 简单易用的事务支持
+* 强大的SQL参数替换支持
+* 高性能的属性赋值机制（使用DynamicMethod生成）
+* 直接使用SQL进行查询
+* 内置SQL构建器，简化SQL编写
+* 支持多种数据库：SQL Server, SQLite, MySQL, MariaDB, Firebird, PostgreSQL等
+* 开源协议：MIT License或Apache 2.0
 
 ## Super easy use and configuration
 
@@ -88,24 +82,14 @@ db.Delete("Articles", "ArticleKey", "ART-123");
 
 Plus much, much [more](https://github.com/CollaboratingPlatypus/PetaPoco/wiki).
 
-## Contributing
+## 贡献指南
 
-PetaPoco welcomes input from the community. After all, what is a product without users? If you would like to contribute, please take the time to read [the contribution guide]. We would also suggest you have a quick read of [Contributing to Open Source on GitHub].
+欢迎对本项目进行贡献！请参考项目中的CONTRIBUTING.md文件获取详细的贡献指南。
 
-## Contributions Honour Roll
+## 许可协议
 
-PetaPoco is not the result of just one person's labour, but rather, the product of a combined effort by many. For those individuals who go above and beyond, [we have a special place to honour them].
+本项目采用MIT License或Apache 2.0开源协议。
 
-[Brad Robinson]:https://www.toptensoftware.com/
-[Massive]:https://github.com/FransBouma/Massive
-[Dapper]:https://github.com/StackExchange/dapper-dot-net
-[SubSonic]:https://subsonic.github.io/
-[ActiveRecord]:https://guides.rubyonrails.org/active_record_basics.html
-[POCO]:https://en.wikipedia.org/wiki/Plain_Old_CLR_Object
-[CodingHorror]:https://web.archive.org/web/20160215051631/subsonicproject.com/docs/CodingHorror
-[XUnit]:https://github.com/xunit/xunit
-[see the docs]:https://github.com/CollaboratingPlatypus/PetaPoco/wiki
-[the contribution guide]:./contributing.md
-[Contributing to Open Source on GitHub]:https://guides.github.com/activities/contributing-to-open-source/
-[we have a special place to honour them]:./honourRoll.md
-[fluent configuration]:https://github.com/CollaboratingPlatypus/PetaPoco/wiki/Fluent-Configuration
+## 原始项目
+
+本项目基于[PetaPoco](https://github.com/CollaboratingPlatypus/PetaPoco)进行修改，保留了其核心功能和设计理念。
